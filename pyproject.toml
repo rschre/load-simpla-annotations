@@ -19,4 +19,8 @@ notebooks = [
 [dependency-groups]
 dev = [
     "ruff>=0.12.9",
+    "types-boto3-custom",
 ]
+
+[tool.uv.sources]
+types-boto3-custom = { path = "vendored/types_boto3_custom-1.42.97-py3-none-any.whl" }
