@@ -6,6 +6,8 @@ data/**/*.JPG
 data/**/*.txt
 config.toml
 
+*failed_downloads.txt
+
 # Python-generated files
 __pycache__/
 *.py[oc]
