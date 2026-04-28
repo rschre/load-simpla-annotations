@@ -1,7 +1,9 @@
 # image_dir
 data/**/*.json
 data/**/*.jpg
+data/**/*.jpeg
 data/**/*.JPG
+data/**/*.txt
 config.toml
 
 # Python-generated files

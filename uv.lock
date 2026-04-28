@@ -961,6 +961,7 @@ notebooks = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "ipykernel" },
     { name = "ruff" },
     { name = "types-boto3-custom" },
 ]
@@ -977,6 +978,7 @@ provides-extras = ["notebooks"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "ipykernel", specifier = ">=6.30.1" },
     { name = "ruff", specifier = ">=0.12.9" },
     { name = "types-boto3-custom", path = "vendored/types_boto3_custom-1.42.97-py3-none-any.whl" },
 ]

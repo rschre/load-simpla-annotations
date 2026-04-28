@@ -8,7 +8,12 @@ from globals import (
     REQUIRED_CONFIG_KEYS,
     REQUIRED_CONFIG_SUBKEYS,
 )
-from object_storage import download_annotation_files_from_s3, init_s3_client
+from storage import (
+    download_annotation_files_from_s3,
+    get_local_annotation_files,
+    init_s3_client,
+    process_annotation_files,
+)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -53,7 +58,7 @@ if __name__ == "__main__":
 
     target_folder = os.path.join(
         pathlib.Path(__file__).parent.absolute(),
-        config["local-storage"]["target-folder"],
+        config["local-storage"]["label-exports"],
     )
     bucket_name = config["annotation-files"]["exoscale-bucket"]
 
@@ -62,4 +67,14 @@ if __name__ == "__main__":
         bucket_name=bucket_name,
         s3_paginator=s3_paginator,
         target_folder=target_folder,
+    )
+
+    annotation_files = get_local_annotation_files(target_folder)
+    logger.info(f"Total annotation files found: {len(annotation_files)}")
+
+    process_annotation_files(
+        annotation_files=annotation_files,
+        s3_client=s3_client,
+        yolo_labels_folder=config["local-storage"]["yolo-labels"],
+        yolo_images_folder=config["local-storage"]["yolo-images"],
     )
