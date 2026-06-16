@@ -104,7 +104,8 @@ def json_to_yolo(input_file: str, output_dir: str) -> None:
 
     skipped_labels = []
     for task in data:
-        image_name = task["data"]["image"].split("/")[-1].split(".")[0]
+        file_name = task["data"]["image"].split("/")[-1]
+        stem = os.path.splitext(file_name)[0]
         polygons = []
 
         for annotation in task.get("annotations", []):
@@ -133,11 +134,11 @@ def json_to_yolo(input_file: str, output_dir: str) -> None:
                     continue
                 polygons.append(polygon)
 
-        with open(os.path.join(output_dir, f"{image_name}.txt"), "w") as f:
+        with open(os.path.join(output_dir, f"{stem}.txt"), "w") as f:
             for polygon in polygons:
                 pts = polygon["points"]
                 try:
-                    class_id = mapping_class(polygon["class"][0])
+                    class_id = mapping_class(polygon["class"][0])  # type: ignore
                 except ValueError as e:
                     logger.warning(
                         f"Skipping polygon with unknown class: {polygon['class'][0]}"
@@ -145,7 +146,7 @@ def json_to_yolo(input_file: str, output_dir: str) -> None:
                     continue
                 f.write(f"{class_id} {' '.join(map(str, pts))}\n")
 
-        logger.debug(f"Processed {len(polygons)} polygons for image: {image_name}")
+        logger.debug(f"Processed {len(polygons)} polygons for image: {stem}")
 
     if skipped_labels:
         logger.warning(f"Skipped labels: {skipped_labels}")

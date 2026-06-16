@@ -6,8 +6,6 @@ import pathlib
 from glob import glob
 
 import boto3
-import cv2
-import numpy as np
 import pandas as pd
 from types_boto3_s3.client import S3Client
 from types_boto3_s3.paginator import ListObjectsV2Paginator
@@ -114,7 +112,7 @@ def process_annotation_files(
 
     for parent_folder, df_labels in df_labels_dict.items():
         for task in df_labels.itertuples():
-            data = task.data
+            data = task.data  # type: ignore
             image_url = data.get("image")
             if image_url is None:
                 logger.warning(f"No image URL found for data entry: {data}")
