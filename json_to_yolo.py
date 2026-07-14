@@ -47,8 +47,13 @@ def bytes2bit(data: List[int]) -> str:
     return "".join(str(access_bit(data, i)) for i in range(len(data) * 8))
 
 
-def brush_to_yolo(rle: List[int], height: int, width: int) -> List[float]:
+def brush_to_yolo(rle: List[int], height: int, width: int) -> List[List[float]]:
     """Convert RLE brush labels to YOLO-compatible normalized polygon coordinates.
+
+    A single brush label can contain multiple disconnected blobs (e.g. an object
+    partially occluded in the middle). Each blob is returned as its own separate
+    polygon instead of being merged into one, since merging draws a bogus edge
+    connecting unrelated contours.
 
     Args:
         rle (List[int]): Run-Length Encoding data from LabelStudio.
@@ -56,7 +61,7 @@ def brush_to_yolo(rle: List[int], height: int, width: int) -> List[float]:
         width (int): Image width.
 
     Returns:
-        List[float]: Normalized (x, y) coordinates for YOLO format.
+        List[List[float]]: One normalized (x, y) coordinate list per contour/instance.
     """
     rle_input = InputStream(bytes2bit(rle))
 
@@ -81,14 +86,16 @@ def brush_to_yolo(rle: List[int], height: int, width: int) -> List[float]:
 
     _, mask = cv2.threshold(image, 1, 255, cv2.THRESH_BINARY)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    polygon = []
+    polygons = []
     for cnt in contours:
         if cv2.contourArea(cnt) > 200:
+            polygon = []
             for point in cnt:
                 x, y = point[0]
                 polygon.extend([x / width, y / height])
+            polygons.append(polygon)
 
-    return polygon
+    return polygons
 
 
 def polygon_to_yolo(points: List[List[float]]) -> List[float]:
@@ -114,10 +121,11 @@ def json_to_yolo(input_file: str, output_dir: str) -> None:
                 width = item["original_width"]
 
                 if item.get("type") == "brushlabels":
-                    polygon = {
-                        "points": brush_to_yolo(item["value"]["rle"], height, width),
-                        "class": item["value"]["brushlabels"],
-                    }
+                    for pts in brush_to_yolo(item["value"]["rle"], height, width):
+                        polygons.append(
+                            {"points": pts, "class": item["value"]["brushlabels"]}
+                        )
+                    continue
                 elif item.get("type") == "polygonlabels":
                     polygon = {
                         "points": polygon_to_yolo(item["value"]["points"]),

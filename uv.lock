@@ -952,6 +952,7 @@ dependencies = [
     { name = "matplotlib" },
     { name = "opencv-python" },
     { name = "pandas" },
+    { name = "pyyaml" },
 ]
 
 [package.optional-dependencies]
@@ -973,6 +974,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.10.5" },
     { name = "opencv-python", specifier = ">=4.12.0.88" },
     { name = "pandas", specifier = ">=2.3.1" },
+    { name = "pyyaml", specifier = ">=6.0.2" },
 ]
 provides-extras = ["notebooks"]
 
